@@ -25,13 +25,14 @@ build:
 	@mkdir -p $(OUTDIR)
 	CGO_ENABLED=$(CGO_ENABLED) $(GO) build -trimpath -tags="$(BUILD_TAGS)" -ldflags "$(LDFLAGS) $(LDFLAGS_VERSION)" -o $(OUTDIR)/$(APP) ./src/main.go
 
-# Run locally (uses the package main in ./cmd/$(APP))
+# Run locally (uses the package main in ./bin/startheme)
 run:
-	$(GO) run -tags="$(BUILD_TAGS)" ./cmd/$(APP)
+	$(GO) run -tags="$(BUILD_TAGS)" ./bin/$(APP)
 
 # Install to $GOBIN or GOPATH/bin
 install:
-	CGO_ENABLED=$(CGO_ENABLED) $(GO) install -tags="$(BUILD_TAGS)" -ldflags "$(LDFLAGS) $(LDFLAGS_VERSION)" ./bin/$(APP)
+	sudo rm -f /usr/local/bin/startheme
+	sudo mv ./bin/startheme /usr/local/bin/startheme
 
 # Test everything
 test:
