@@ -31,7 +31,7 @@ run:
 
 # Install to $GOBIN or GOPATH/bin
 install:
-	CGO_ENABLED=$(CGO_ENABLED) $(GO) install -tags="$(BUILD_TAGS)" -ldflags "$(LDFLAGS) $(LDFLAGS_VERSION)" ./cmd/$(APP)
+	CGO_ENABLED=$(CGO_ENABLED) $(GO) install -tags="$(BUILD_TAGS)" -ldflags "$(LDFLAGS) $(LDFLAGS_VERSION)" ./bin/$(APP)
 
 # Test everything
 test:

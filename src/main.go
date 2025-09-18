@@ -1,4 +1,4 @@
-package startheme
+package main
 
 import (
 	"fmt"
