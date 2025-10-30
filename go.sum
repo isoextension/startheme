@@ -5,6 +5,10 @@ github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/gopherjs/gopherjs v0.0.0-20190411002643-bd77b112433e/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=
 github.com/gopherjs/gopherjs v1.17.2 h1:fQnZVsXk8uxXIStYb0N4bGk7jeyTalG/wsZjQ25dO0g=
 github.com/gopherjs/gopherjs v1.17.2/go.mod h1:pRRIvn/QzFLrKfvEz3qUuEhtE/zLCWfreZ6J5gM2i+k=
+github.com/isoextension/btgo v0.0.0-20251012021248-cce67ac75e47 h1:FyyoX6glMkVPfrZ3C9TSB2A4eBtF/y34psFHKnTPnFk=
+github.com/isoextension/btgo v0.0.0-20251012021248-cce67ac75e47/go.mod h1:l+eJD/jCITBgfOtNLJzwQj30jIjS5I6WEVbNBOlp26A=
+github.com/isoextension/btgo v0.0.0-20251030044747-d9475936658c h1:dcfEySWwIXl+1d7hhmC/TYPAu4UC3GaInDxw/uWbRpw=
+github.com/isoextension/btgo v0.0.0-20251030044747-d9475936658c/go.mod h1:l+eJD/jCITBgfOtNLJzwQj30jIjS5I6WEVbNBOlp26A=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/konsorten/go-windows-terminal-sequences v1.0.2/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
