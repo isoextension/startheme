@@ -1,35 +1,53 @@
 # Makefile — Go project helper
-APP ?= startheme
-PKG ?= ./...
+app ?= startheme
+_PKG ?= ./...
+MAKE ?= make
 GO ?= go
 CGO_ENABLED ?= 0
-OUTDIR ?= bin
+out_dir ?= bin
+out = $(OUTDIR)/$(APP)
 
 # Default build tags (empty by default)
 BUILD_TAGS ?=
 
 LDFLAGS ?= -s -w
-TIME := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
-GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
-GOVERSION := $(shell $(GO) version | awk '{print $$3}')
+_TIME := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
+_GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
+_GOVERSION := $(shell $(GO) version | awk '{print $$3}')
 
 # ldflags injection for version info
 LDFLAGS_VERSION := -X 'main.buildTime=$(TIME)' -X 'main.commit=$(GIT_COMMIT)' -X 'main.goVersion=$(GOVERSION)'
 
-.PHONY: all build run install test fmt vet tidy lint clean deps cross
+.PHONY: all build run install test fmt vet tidy lint clean deps cross dev head
 
-all: build
+help:
+	@echo "startheme Make"
+	@echo "  all      Do everything and install Startheme."
+	@echo "  help     Display this message."
+	@echo "  build    Build Startheme from source."
+	@echo "  run      Run Startheme."
+	@echo "  install  Install Startheme."
+	@echo "  test     Test Startheme."
+	@echo "  fmt      Format source code."
+	@echo "  vet      Audit code."
+	@echo "  tidy     Update/make go.sum."
+	@echo "  deps     Install dependencies."
+	@echo "  cross    Cross compile helper. (the code still doesnt work for windows or macos, contribs are welcome)"
+	@echo "  dev      Quick development helper."
+	@echo "  head     Build from HEAD."
+
+all: deps tidy build install clean
 
 # Build for current platform
 build:
 	@mkdir -p $(OUTDIR)
-	CGO_ENABLED=$(CGO_ENABLED) $(GO) build -trimpath -tags="$(BUILD_TAGS)" -ldflags "$(LDFLAGS) $(LDFLAGS_VERSION)" -o $(OUTDIR)/$(APP) ./src/main.go
+	@CGO_ENABLED=$(CGO_ENABLED) $(GO) build -trimpath -tags="$(BUILD_TAGS)" -ldflags "$(LDFLAGS) $(LDFLAGS_VERSION)" -o $(OUTDIR)/$(APP) ./src/main.go
 
 # Run locally (uses the package main in ./bin/startheme)
 run:
 	$(GO) run -tags="$(BUILD_TAGS)" ./bin/$(APP)
 
-# Install to $GOBIN or GOPATH/bin
+# Install 
 install:
 	sudo rm -f /usr/local/bin/startheme
 	sudo mv ./bin/startheme /usr/local/bin/startheme
@@ -60,36 +78,30 @@ lint:
 
 # Cross-compile helper
 # Example: make cross GOOS=linux GOARCH=arm64
+_binary_name = $(app)-$(os)-$(arch)
 cross:
-ifndef GOOS
-	$(error GOOS is not set. e.g. make cross GOOS=linux GOARCH=amd64)
+ifndef os
+	$(error os is not set. e.g. make cross os=linux arch=amd64)
 endif
-ifndef GOARCH
-	$(error GOARCH is not set. e.g. make cross GOOS=linux GOARCH=amd64)
+ifndef arch
+	$(error arch is not set. e.g. make cross os=linux arch=amd64)
 endif
+ifeq 
 	@mkdir -p dist
-	GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 $(GO) build -trimpath -tags="$(BUILD_TAGS)" -ldflags "$(LDFLAGS) $(LDFLAGS_VERSION)" -o dist/$(APP)-$(GOOS)-$(GOARCH) ./cmd/$(APP)
+	GOOS=$(os) GOARCH=$(arch) CGO_ENABLED=$(CGO_ENABLED) $(GO) build -trimpath -tags="$(BUILD_TAGS)" -ldflags "$(LDFLAGS) $(LDFLAGS_VERSION)" -o dist/$(app)-$(os)-$(arch) ./src/main.go
 
 # Quick dev loop: format, vet, test, build
 dev: fmt vet test build
 
 # Clean artifacts
 clean:
-	@rm -rf $(OUTDIR) dist
+	@rm -rf $(out_dir) dist
 
-# Show make help
-help:
-	@printf "Makefile targets:\n"
-	@printf "  make build       Build binary (./bin/$(APP))\n"
-	@printf "  make run         Run from source (go run)\n"
-	@printf "  make install     Install to GOBIN\n"
-	@printf "  make test        Run tests\n"
-	@printf "  make fmt         go fmt ./...\n"
-	@printf "  make vet         go vet ./...\n"
-	@printf "  make tidy        go mod tidy\n"
-	@printf "  make deps        go mod download\n"
-	@printf "  make lint        Run golangci-lint (if installed)\n"
-	@printf "  make cross GOOS=<os> GOARCH=<arch>  Cross-build (outputs in dist/)\n"
-	@printf "  make dev         fmt, vet, test, build\n"
-	@printf "  make clean       Remove build artifacts\n"
+head:
+	@echo "Building from $(_GIT_COMMIT)"
+	@git pull origin trunk
+	@git push origin trunk
+	@$(MAKE) cross os=$(os) arch=$(arch)
+
+
 

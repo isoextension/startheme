@@ -11,32 +11,22 @@ import (
 	"github.com/isoextension/btgo/logger"
 )
 
-type humanizederror struct {
-	Message string
-	Code int
+var homeDir, hmdirerr     = os.UserHomeDir()
+var starshipDir    string = filepath.Join(homeDir, ".config", "starship")
+var starshipConfig string = filepath.Join(homeDir, ".config", "starship.toml")
+var l *logger.Logger = logger.New("startheme", nil)
+
+func hint(hint string) {
+	if os.Getenv("STARTHEME_HINT_ENABLE") == "true" ||
+	   os.Getenv("STARTHEME_HINT_ENABLE") == "1" {
+		l.Fplainf(os.Stderr, "%s%s%s\n", ansi.Gray.String(), hint, ansi.Reset.String())
+	   }
 }
-var errorMessages = map[string]humanizederror{
-	"STARTHEME_NOT_MANAGED":         {"Not managed by startheme",3},
-	"STARTHEME_THEME_NOT_FOUND":     {"No such theme",4},
-	"STARTHEME_THEME_INVALID":       {"Theme is invalid",5},
-	"STARTHEME_STARSHIP_DIR":        {"Starship theme dir does not exist",6},
-	"STARTHEME_STARSHIP_DIR_ENOENT": {"~/.config/starship is not a directory",7},
-	"STARTHEME_SYMLINK_FAILED":      {"starship.toml symlinking failed",8},
-}
-var l *logger.Logger = logger.New("startheme")
+
 type theme struct {
 	path string
 	name string
 }
-
-func humanizeError(err error) humanizederror {
-	toReturn, ok := errorMessages[err.Error()]
-	if ok {
-		return toReturn
-	}
-	return humanizederror{err.Error(), 2}
-}
-
 func newtheme(path string, name string) *theme {
 	return &theme{
 		path: path, 
@@ -45,26 +35,20 @@ func newtheme(path string, name string) *theme {
 }
 
 func main() {
+	if hmdirerr != nil {
+		panic(hmdirerr)
+	}
 	if len(os.Args) < 2 {
 		showHelp()
 		return
 	}
-
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		l.Fplainf(os.Stderr, "%s✖ error getting home directory %v%s\n", ansi.Red.String(), err, ansi.Reset.String())
-		os.Exit(6)
-	}
-
-	starshipDir := filepath.Join(homeDir, ".config", "starship")
-	starshipConfig := filepath.Join(homeDir, ".config", "starship.toml")
 
 	switch os.Args[1] {
 	case "list":
 		listThemes(starshipDir)
 	case "change", "use":
 		if len(os.Args) < 3 {
-			l.Fplainf(os.Stderr, "%s✖ arguments missing%s\n", ansi.Red.String(), err, ansi.Reset.String())
+			l.Fplainf(os.Stderr, "%s✖ arguments missing%s\n", ansi.Red.String(), ansi.Reset.String())
 			os.Exit(1)
 		}
 		changeTheme(starshipDir, starshipConfig, os.Args[2])
@@ -73,7 +57,7 @@ func main() {
 	case "help", "-h", "--help":
 		showHelp()
 	default:
-		l.Fplainf(os.Stderr, "%s✖ unknown subcommand: %s%s\n", ansi.Red.String(), os.Args[1], )
+		l.BasicErrorf("no such command %s", os.Args[2])
 		showHelp()
 		os.Exit(1)
 	}
@@ -178,17 +162,28 @@ func getCurrentTheme(starshipConfig string) (*theme, error) {
 	}
 }
 
-func openCurrent(target theme) {
+func openTheme(target theme) error {
 	var editor string
+	if target.path == "" {
+    	currentTheme, err := getCurrentTheme(starshipConfig)
+    	if err != nil {
+        	// handle error
+        	return err
+    	}
+    	target = *currentTheme
+	}
 
-	if len(os.Getenv("EDITOR")) != 0 { editor=os.Getenv("EDITOR") } else {
-		l.Warning("$EDITOR is not set (length is 0), defaulting to /bin/env vim")
-		l.Info("hint: try doing this:\n  EDITOR=nvim startheme edit")
+	editor = os.Getenv("EDITOR")
+
+	if editor == "" {
+		l.Warning("$EDITOR is empty, defaulting to /bin/env vim")
+		l.Info("hint: try doing this:\n  EDITOR=myeditor startheme edit")
 		editor = "/bin/env vim"
 	}
 	var editorproc *exec.Cmd = exec.Command(editor, target.path)
 	var err                  = editorproc.Run()
 	if err != nil {
-		l.Error()
+		return err
 	}
+	return nil
 }
