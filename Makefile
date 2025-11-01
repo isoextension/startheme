@@ -41,7 +41,7 @@ all: deps tidy build install clean
 # Build for current platform
 build:
 	@mkdir -p $(OUTDIR)
-	@CGO_ENABLED=$(CGO_ENABLED) $(GO) build -trimpath -tags="$(BUILD_TAGS)" -ldflags "$(LDFLAGS) $(LDFLAGS_VERSION)" -o $(OUTDIR)/$(APP) ./src/main.go
+	@CGO_ENABLED=$(CGO_ENABLED) $(GO) build -trimpath -tags="$(BUILD_TAGS)" -ldflags "$(LDFLAGS) $(LDFLAGS_VERSION)" -o $(OUTDIR)/$(APP) ./main/main.go
 
 # Run locally (uses the package main in ./bin/startheme)
 run:
@@ -81,7 +81,7 @@ lint:
 _binary_name = $(app)-$(os)-$(arch)
 cross:
 ifndef os
-	$(error os is not set. e.g. make cross os=linux arch=amd64)
+	$(error os is not set. e.g. make cross os=linux GOARCH=amd64)
 endif
 ifndef arch
 	$(error arch is not set. e.g. make cross os=linux arch=amd64)
