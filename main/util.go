@@ -1,16 +1,12 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
+	"strings"
+
+	"github.com/isoextension/btgo/ansi"
 )
 
-var debugbuf bytes.Buffer
-
-func debugf(format string, args ...interface{}) {
-	log.Fplainf(&debugbuf, format, args...)
-}
-
-func debugln(args ...interface{}) {
-	fmt.Fprintln(&debugbuf, args...)
+func hint(msg string, indent int) {
+	indents := strings.Repeat(" ", indent)
+	log.Plainf("%s%shint: %s%s", indents, ansi.BrightBlue.String(), msg, ansi.Reset.String())
 }

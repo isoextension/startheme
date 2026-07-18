@@ -15,12 +15,22 @@ type Theme struct {
 	Code        // required
 }
 
-type Repo struct {
-	Name string // specified by user
-	URL  URL    // required
+type SwitchCmd struct {
+	Name      string `arg:"positional"`
+	RepoToGet string `arg:"-r,--repo,env:STARTHEME_REPO"`
 }
 
+type GetCurrent struct {
+	ShowCode bool `arg:"-c,--code,--show-code"`
+	ShowPath bool `arg:"-p,--path,--show-path"`
+}
+
+type ListCmd struct{}
+
 type Arguments struct {
+	Switch *SwitchCmd  `arg:"subcommand:use"`
+	Get    *GetCurrent `arg:"subcommand:get"`
+	List   *ListCmd    `arg:"subcommand:list"`
 }
 
 // / METHODS ///
